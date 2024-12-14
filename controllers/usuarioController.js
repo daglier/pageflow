@@ -5,6 +5,27 @@
     const configurationForm = document.getElementById('configuration-form');
 
 
+    // Función para mejorar el estado del préstamo con emojis y texto descriptivo
+    const transformarEstadoPrestamo = estado => {
+        switch (estado) {
+            case 'en_prestamo':
+                return 'En préstamo 📚';
+            case 'devuelto':
+                return 'Devuelto ✅';
+            case 'retrasado':
+                return 'Retrasado ⏰';
+            default:
+                return estado;
+        }
+    }
+
+    // Función para obtener el título del libro por su ID
+    const obtenerTituloLibroPorId = (id_libro) => {
+        return fetch(`../../controllers/libroController.php?action=obtenerTituloLibroPorId&id_libro=${id_libro}`)
+            .then(response => response.json())
+            .then(data => data.titulo_libro);
+    };
+
     // Función para manejar el envío del formulario de inicio de sesión
     if (loginForm) {
         loginForm.addEventListener('submit', event => {
@@ -126,10 +147,11 @@
                                     <td>${usuario.nombre_usuario}</td>
                                     <td>${usuario.rol}</td>
                                     <td>${usuario.ultimo_inicio_sesion}</td>
-                                    <td><button class="btn btn-ver-historial"><i class="fas fa-history"></i> Ver Historial</button>
+                                    <td>
+                                        <button class="btn btn-ver-historial" data-id="${usuario.id}" data-nombre_usuario="${usuario.nombre_usuario}">
+                                            <i class="fas fa-history"></i> Ver
+                                        </button>
                                     </td>
-                                    <td><button class="btn btn-aplicar-penalizacion"><i class="fas fa-exclamation-triangle"></i>
-                                            Aplicar</button></td>
                                 `;
                         datatableUsuarios.row.add(row).draw();
                     });
@@ -141,6 +163,73 @@
                 console.error('Error al realizar la solicitud para cargar los usuarios:', error);
             });
     };
+
+    // Eventos para el botón "Ver historial"
+    document.addEventListener('click', event => {
+        if (event.target.classList.contains('btn-ver-historial')) {
+            const idUsuario = event.target.getAttribute('data-id');
+            const nombreUsuario = event.target.getAttribute('data-nombre_usuario');
+
+            modalHistorialContentTitle.textContent = `Historial de préstamos - ${nombreUsuario}`;
+            messageNoHistorial.classList.add('hide');
+            tableHistorial.classList.add('hide');
+
+            fetch(`../../controllers/prestamoController.php?action=obtenerPrestamosPorIdUsuario&id_usuario=${idUsuario}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        tableHistorial.classList.remove('hide');
+                        tbodyHistorial.innerHTML = '';
+
+                        // Agrega las nuevas filas a la tabla
+                        if (data.prestamos.length > 0) {
+                            const promesas = data.prestamos.map(prestamo => {
+                                return obtenerTituloLibroPorId(prestamo.id_libro)
+                                    .then(tituloLibro => {
+                                        return {
+                                            ...prestamo,
+                                            tituloLibro
+                                        };
+                                    })
+                                    .catch(error => {
+                                        console.error('Error al obtener el título del libro:', error);
+                                        return prestamo;
+                                    });
+                            });
+
+                            Promise.all(promesas)
+                                .then(prestamosCompletos => {
+                                    prestamosCompletos.forEach(prestamo => {
+                                        const estadoTransformado = transformarEstadoPrestamo(prestamo.estado);
+
+                                        const row = document.createElement('tr');
+                                        row.innerHTML = `
+                                <td>${prestamo.id_prestamo}</td>
+                                <td>${prestamo.tituloLibro}</td>
+                                <td>${prestamo.fecha_prestamo}</td>
+                                <td>${prestamo.fecha_devolucion_estimada}</td>
+                                <td>${prestamo.fecha_devolucion ? prestamo.fecha_devolucion : 'No registrada'}</td>
+                                <td>${estadoTransformado}</td>
+                            `;
+                                        tbodyHistorial.appendChild(row);
+                                    });
+                                })
+                                .catch(error => {
+                                    console.error('Error al procesar los préstamos completos:', error);
+                                });
+                        }
+                    } else {
+                        messageNoHistorial.classList.remove('hide');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al cargar el historial:', error);
+                });
+
+            // Muestra el modal
+            showModal(modalHistorial);
+        }
+    });
 
     if (configurationForm) {
         // Lógica de realizar la actualización de datos del usuario
@@ -200,4 +289,12 @@
                 });
         });
     }
+
+    // Cierra el modal cuando se hace clic fuera del área del modal
+    window.addEventListener('click', event => {
+        if (event.target === modalHistorial) hideModal(modalHistorial);
+    });
+
+    // Cierra el modal cuando se hace clic en el botón de cerrar del modal
+    cerrarModalHistorialBtn.addEventListener('click', () => hideModal(modalHistorial));
 })();

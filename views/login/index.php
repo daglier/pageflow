@@ -91,7 +91,7 @@ session_destroy();
                     </div>
                     <div class="checkbox-box">
                         <input type="checkbox" id="admin-checkbox" name="rol">
-                        <label for="admin-checkbox">Registrar como administrador</label>
+                        <label for="admin-checkbox">Registrarse como administrador</label>
                     </div>
                     <input class="btn" type="submit" value="Registrarse">
 

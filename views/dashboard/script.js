@@ -11,10 +11,13 @@ const sidebar = document.querySelector('.sidebar');
 const tableLibros = document.getElementById("table-libros");
 const tablePrestamos = document.getElementById("table-prestamos");
 const tableUsuarios = document.getElementById("table-usuarios");
+const tableHistorial= document.getElementById("table-historial");
 
 //tbody de las tablas principales de los modulos
 const tbodyLibros = document.getElementById("tbody-libros");
+const tbodyPrestamos = document.getElementById("tbody-prestamos");
 const tbodyUsuarios = document.getElementById("tbody-usuarios");
+const tbodyHistorial = document.getElementById("tbody-historial");
 
 // Elementos del modal del módulo de libros
 const modalLibros = document.getElementById('modal-anadir-modificar-libro');
@@ -24,7 +27,7 @@ const formAnadirModificarLibro = document.getElementById('form-anadir-modificar-
 const modalLibrosContentTitle = document.getElementById("title-modal-libro");
 const modalLibrosBtn = document.getElementById('modal-libros-btn');
 
-// Campos del formulario de años
+// Campos del formulario de libros
 const libroId = document.getElementById("libro-id");
 const libroTitulo = document.getElementById("libro-titulo");
 const libroAutor = document.getElementById("libro-autor");
@@ -33,6 +36,13 @@ const libroAnoPublicacion = document.getElementById("libro-ano-publicacion");
 const libroEstado = document.getElementById("libro-estado");
 const libroSinopsis = document.getElementById("libro-sinopsis");
 const libroFechaRegistro = document.getElementById("libro-fecha-registro");
+
+// Elementos del modulo de usuarios
+const modalHistorial = document.getElementById('modal-historial-prestamos');
+const contenidoHistorial = document.getElementById('historial-prestamos-contenido');
+const cerrarModalHistorialBtn = document.getElementById('close-modal-historial-btn');
+const modalHistorialContentTitle = document.getElementById("title-modal-historial");
+const messageNoHistorial = document.getElementById("message-no-historial");
 
 // Elementos del modulo de configuracion
 const selectOpcion = document.getElementById('configuracion-opcion');
@@ -139,17 +149,38 @@ const inicializarDataTable = (table, targets, nombreArchivo = '', columnsToRemov
 
     return $(table).DataTable({
         destroy: true,
-        paging: false,  // Desactivar la paginación
-        searching: false,  // Desactivar la búsqueda
+        paging: true,  // Activar la paginación
+        searching: true,  // Activa el campo de búsqueda
+        pageLength: 10,  // Número de filas por página
         ordering: true,  // Activar la ordenación
-        info: false,  // Ocultar la información de entradas mostradas
+        lengthMenu: [5, 10, 25, 50, 100],  // Opciones de filas por página
+        info: true,  // Ocultar la información de entradas mostradas
+        responsive: true,  // Activar diseño responsivo
         language: {
-            "emptyTable": "No hay información disponible"
+            emptyTable: "No hay información disponible en la tabla",
+            search: "Buscar:",
+            lengthMenu: "Mostrar _MENU_ registros por página",
+            info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
+            infoEmpty: "Mostrando 0 a 0 de 0 registros",
+            infoFiltered: "(filtrado de _MAX_ registros totales)",
+            loadingRecords: "Cargando...",
+            processing: "Procesando...",
+            zeroRecords: "No se encontraron resultados coincidentes",
+            paginate: {
+                first: "Primero",
+                last: "Último",
+                next: "Siguiente",
+                previous: "Anterior"
+            },
+            aria: {
+                sortAscending: ": activar para ordenar la columna de manera ascendente",
+                sortDescending: ": activar para ordenar la columna de manera descendente"
+            }
         },
-        columnDefs: [{
-            "orderable": false,
-            "targets": targets
-        }],
+        columnDefs: [
+            { targets: targets, orderable: false },
+            { targets: 3, type: 'date' }
+        ],
         buttons: [
             {
                 extend: 'excelHtml5',
@@ -252,9 +283,15 @@ const inicializarDataTable = (table, targets, nombreArchivo = '', columnsToRemov
 };
 
 // Inicializa las tablas con nombres personalizados
-const datatableLibros = inicializarDataTable('#table-libros', [8, 9], 'Libros', [8, 9]);
-const datatablePrestamos = inicializarDataTable('#table-prestamos', [4, 5], 'Prestamos', [4, 5]);
-const datatableUsuarios = inicializarDataTable('#table-usuarios', [4, 5], 'Usuarios', [4, 5]);
+const datatableLibros = inicializarDataTable(
+    '#table-libros',
+    usuarioActual.rol === 'administrador' ? [8, 9] : [],
+    'Libros',
+    usuarioActual.rol === 'administrador' ? [8, 9] : []
+);
+
+const datatablePrestamos = inicializarDataTable('#table-prestamos', [], 'Prestamos', []);
+const datatableUsuarios = inicializarDataTable('#table-usuarios', [4], 'Usuarios', [4]);
 
 // Función para agregar un evento de descarga a un botón específico
 const agregarEventoDescargar = (boton, datatable, tipo) => {

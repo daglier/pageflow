@@ -120,6 +120,19 @@ class LibroController
             echo json_encode(['success' => false, 'message' => 'Error al eliminar el libro.']);
         }
     }
+
+    // Función para obtener el título de un libro por su ID
+    public function obtenerTituloLibroPorId()
+    {
+        $id_libro = $_GET['id_libro'];
+        $libro = $this->libroDAO->getLibroById($id_libro);
+
+        if ($libro) {
+            echo json_encode(['success' => true, 'titulo_libro' => $libro->getTitulo()]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Libro no encontrado.']);
+        }
+    }
 }
 
 // Instanciar el controlador

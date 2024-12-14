@@ -57,7 +57,7 @@ class UsuarioController
         // Recibir datos del formulario
         $nombre_usuario = $_POST["nombre_usuario"];
         $contrasena = $_POST["contrasena"];
-        $rol = isset($_POST["admin-checkbox"]) && $_POST["admin-checkbox"] === "on" ? "administrador" : "lector";
+        $rol = isset($_POST["rol"]) && $_POST["rol"] === "on" ? "administrador" : "lector";
         $fecha_registro = date("Y-m-d H:i:s");
         $hashed_password = password_hash($contrasena, PASSWORD_DEFAULT);
         $pregunta_seguridad_1 = $_POST["pregunta_seguridad_1"];
@@ -71,11 +71,15 @@ class UsuarioController
         }
 
         // Crear y registrar el nuevo usuario
-        $nuevoUsuario = new Usuario($nombre_usuario, $hashed_password, $rol, $fecha_registro, $pregunta_seguridad_1, $pregunta_seguridad_2, $pregunta_seguridad_3, null);
+        $nuevoUsuario = new Usuario($nombre_usuario, $hashed_password, $rol, $fecha_registro, $pregunta_seguridad_1, $pregunta_seguridad_2, $pregunta_seguridad_3, $fecha_registro);
 
         if ($this->usuarioDAO->crearUsuario($nuevoUsuario)) {
             $_SESSION['id_usuario'] = $nuevoUsuario->getId_usuario();
             $_SESSION['nombre_usuario'] = $nombre_usuario;
+            $_SESSION["rol"] = $rol;
+
+            // Actualizar último inicio de sesión
+
             echo json_encode(['success' => true, 'message' => 'Registro exitoso.']);
         } else {
             echo json_encode(['success' => false, 'message' => 'Error al registrar el usuario.']);
@@ -145,7 +149,6 @@ class UsuarioController
     {
         $id_usuario = $_GET['id_usuario'];
 
-        // Obtener el usuario por ID
         $usuario = $this->usuarioDAO->getUsuarioById($id_usuario);
 
         if ($usuario) {
@@ -159,8 +162,7 @@ class UsuarioController
     public function obtenerNombreUsuarioPorId()
     {
         $id_usuario = $_GET['id_usuario'];
-        $usuarioDAO = new UsuarioDAO();
-        $usuario = $usuarioDAO->getUsuarioById($id_usuario);
+        $usuario = $this->usuarioDAO->getUsuarioById($id_usuario);
 
         if ($usuario) {
             echo json_encode(['success' => true, 'nombre_usuario' => $usuario->getNombre_usuario()]);
@@ -168,7 +170,6 @@ class UsuarioController
             echo json_encode(['success' => false, 'message' => 'Usuario no encontrado.']);
         }
     }
-
 
     // Función para cambiar la contraseña del usuario actual
     public function cambiarContrasena()

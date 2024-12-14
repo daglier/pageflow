@@ -70,7 +70,7 @@ html {
 }
 
 ::-webkit-scrollbar-thumb:active {
-    background:var(--color-secondary);
+    background: var(--color-secondary);
 }
 
 ::-webkit-scrollbar-corner {
@@ -358,9 +358,119 @@ h2 {
 }
 
 
+/* Estilos para las tablas */
+#table-libros_wrapper label,
+#table-libros_wrapper select,
+#table-libros_wrapper input,
+#table-usuarios_wrapper label,
+#table-usuarios_wrapper select,
+#table-usuarios_wrapper input,
+#table-prestamos_wrapper label,
+#table-prestamos_wrapper select,
+#table-prestamos_wrapper input {
+    display: inline;
+}
+
+#table-libros_wrapper .dataTables_length,
+#table-libros_wrapper .dataTables_filter,
+#table-libros_wrapper .dataTables_info,
+#table-libros_wrapper .dataTables_paginate,
+#table-usuarios_wrapper .dataTables_length,
+#table-usuarios_wrapper .dataTables_filter,
+#table-usuarios_wrapper .dataTables_info,
+#table-usuarios_wrapper .dataTables_paginate,
+#table-prestamos_wrapper .dataTables_length,
+#table-prestamos_wrapper .dataTables_filter,
+#table-prestamos_wrapper .dataTables_info,
+#table-prestamos_wrapper.dataTables_paginate {
+    color: var(--color-secondary-text);
+}
+
+#table-libros_wrapper input[type="search"],
+#table-usuarios_wrapper input[type="search"],
+#table-prestamos_wrapper input[type="search"] {
+    margin-left: 1rem;
+    padding: 0.5rem;
+    border: 2px solid var(--color-primary);
+    border-radius: 0.5rem;
+    color: var(--color-primary-text);
+    background-color: #fff;
+    transition: border-color var(--transition-medium) var(--transition-timing-function-default), background-color var(--transition-medium) var(--transition-timing-function-default), color var(--transition-medium) var(--transition-timing-function-default);
+}
+
+#table-libros_wrapper input[type="search"]:focus,
+#table-usuarios_wrapper input[type="search"]:focus,
+#table-prestamos_wrapper input[type="search"]:focus {
+    border-color: var(--color-primary);
+    color: var(--color-primary-text);
+    background-color: var(--color-primary-bg);
+}
+
+#table-libros_wrapper select,
+#table-usuarios_wrapper select,
+#table-prestamos_wrapper select {
+    display: inline-block;
+    width: 4rem;
+    margin-bottom: 0;
+    padding: 0.5rem;
+    border: 2px solid var(--color-secondary-text);
+    border-radius: 0.5rem;
+    color: var(--color-primary-text);
+    background-color: #fff;
+    background-image: none;
+    transition: border-color var(--transition-medium) var(--transition-timing-function-default), background-color var(--transition-medium) var(--transition-timing-function-default), color var(--transition-medium) var(--transition-timing-function-default);
+}
+
+#table-libros_wrapper select:focus,
+#table-usuarios_wrapper select:focus,
+#table-prestamos_wrapper select:focus {
+    border-color: var(--color-primary);
+}
+
+#table-libros_wrapper .paginate_button,
+#table-usuarios_wrapper .paginate_button,
+#table-prestamos_wrapper .paginate_button {
+    padding: 0.5rem;
+    border: 1px solid var(--color-secondary-text);
+    border-radius: 0.5rem;
+    color: var(--color-primary-text);
+    background-color: var(--color-primary-bg);
+    transition: border-color var(--transition-medium) var(--transition-timing-function-default), background-color var(--transition-medium) var(--transition-timing-function-default), color var(--transition-medium) var(--transition-timing-function-default);
+}
+
+#table-libros_wrapper .paginate_button:hover,
+#table-usuarios_wrapper .paginate_button:hover,
+#table-prestamos_wrapper .paginate_button:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary-text);
+    background-color: #fff;
+}
+
+#table-libros_wrapper .paginate_button.current,
+#table-usuarios_wrapper .paginate_button.current,
+#table-prestamos_wrapper .paginate_button.current {
+    color: #fff;
+    background-color: var(--color-primary);
+}
+
+#table-libros_wrapper .paginate_button.current:hover,
+#table-usuarios_wrapper .paginate_button.current:hover,
+#table-prestamos_wrapper .paginate_button.current:hover {
+    background-color: var(--color-primary);
+}
+
+#table-libros_wrapper .paginate_button.disabled,
+#table-usuarios_wrapper .paginate_button.disabled,
+#table-prestamos_wrapper .paginate_button.disabled {
+    color: var(--color-primary-text);
+}
+
+
 .btn-anadir,
 .btn-modificar,
 .btn-eliminar,
+.btn-prestamo,
+.btn-devolver,
 .btn-excel,
 .btn-pdf {
     display: flex;
@@ -376,7 +486,9 @@ h2 {
 }
 
 .btn-modificar,
-.btn-eliminar {
+.btn-eliminar,
+.btn-prestamo,
+.btn-devolver {
     margin: 0 auto;
     padding: 0.7rem 0.7rem;
     font-size: 1.7em;
@@ -400,7 +512,7 @@ h2 {
 .btn-modificar:hover,
 .btn-modificar:active {
     color: var(--color-btn-modify-hover);
-    background-color: #e6e6e6;
+    background-color: #fff;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
@@ -412,7 +524,22 @@ h2 {
 .btn-eliminar:hover,
 .btn-eliminar:active {
     color: var(--color-btn-delete-hover);
-    background-color: #e6e6e6;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-prestamo,
+.btn-devolver {
+    border: 3px solid var(--color-primary);
+    background-color: var(--color-primary);
+}
+
+.btn-prestamo:hover,
+.btn-prestamo:active,
+.btn-devolver:hover,
+.btn-devolver:active {
+    color: var(--color-primary);
+    background-color: #fff;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
@@ -470,6 +597,10 @@ h2 {
     background-color: #fff;
     transition: transform 0.3s ease-out;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+#modal-historial-prestamos .modal-content{
+    max-width: 900px;
 }
 
 .close-btn {
@@ -613,7 +744,7 @@ textarea {
     font-size: 16px;
     line-height: 1.5;
     background-color: #f9f9f9;
-    resize: vertical; 
+    resize: vertical;
     transition: all 0.3s ease;
 }
 
@@ -621,7 +752,7 @@ textarea:focus {
     border-color: var(--color-primary);
     background-color: #fff;
     outline: none;
-    box-shadow: 0 0 8px var(--color-primary); 
+    box-shadow: 0 0 8px var(--color-primary);
 }
 
 /*Styles configuracion section*/

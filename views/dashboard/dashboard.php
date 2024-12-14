@@ -38,6 +38,7 @@ include '../../config/conexion.php';
     <script src="script.js" type="text/javascript" defer></script>
     <script src="../../controllers/usuarioController.js" defer></script>
     <script src="../../controllers/libroController.js" defer></script>
+    <script src="../../controllers/prestamoController.js" defer></script>
     <link rel="stylesheet" href="../../public/datatables/datatables.css">
     <link rel="stylesheet" href="../../public/datatables/datatables.min.css">
 </head>
@@ -57,12 +58,14 @@ include '../../config/conexion.php';
                 <a class="menu-item libros is-active" href="#">
                     <i class="fas fa-book"></i> <span class="menu-text">Libros</span>
                 </a>
-                <a class="menu-item seguimiento-prestamos" href="#">
-                    <i class="fas fa-book-reader"></i> <span class="menu-text">Seguimiento préstamos</span>
-                </a>
-                <a class="menu-item usuarios" href="#">
-                    <i class="fas fa-users"></i> <span class="menu-text">Usuarios</span>
-                </a>
+                <?php if ($rolUsuario === 'administrador') : ?>
+                    <a class="menu-item seguimiento-prestamos" href="#">
+                        <i class="fas fa-book-reader"></i> <span class="menu-text">Seguimiento préstamos</span>
+                    </a>
+                    <a class="menu-item usuarios" href="#">
+                        <i class="fas fa-users"></i> <span class="menu-text">Usuarios</span>
+                    </a>
+                <?php endif; ?>
                 <a class="menu-item configuracion" href="#">
                     <i class="fas fa-gear"></i> <span class="menu-text">Configuración</span>
                 </a>
@@ -99,8 +102,12 @@ include '../../config/conexion.php';
                         <th>Estado</th>
                         <th>Sinopsis</th>
                         <th>Fecha de registro</th>
-                        <th>Modificar</th>
-                        <th>Eliminar</th>
+                        <?php if ($rolUsuario === 'administrador') : ?>
+                            <th>Modificar</th>
+                            <th>Eliminar</th>
+                        <?php elseif ($rolUsuario === 'lector') : ?>
+                            <th>Pedir préstamo</th>
+                        <?php endif; ?>
                     </tr>
                 </thead>
                 <tbody id="tbody-libros">
@@ -148,7 +155,7 @@ include '../../config/conexion.php';
                         </div>
                         <div class="row">
                             <label for="libro-ano"><i class="fa-solid fa-calendar"></i> Año de publicación:</label>
-                            <input type="number" name="ano-publicacion" id="libro-ano-publicacion" min="1000" max="9999" required>
+                            <input type="number" name="ano-publicacion" id="libro-ano-publicacion" min="1000" max="<?php echo date('Y'); ?>" required>
                         </div>
                         <div class="row">
                             <label for="libro-estado"><i class="fa-solid fa-book-open"></i> Estado:</label>
@@ -163,7 +170,7 @@ include '../../config/conexion.php';
                             <label for="libro-sinopsis"><i class="fa-solid fa-align-left"></i> Sinopsis:</label>
                             <textarea name="sinopsis" id="libro-sinopsis" rows="4" maxlength="1000"></textarea>
                         </div>
-                        <div class="row" style="display: none;" >
+                        <div class="row" style="display: none;">
                             <label for="libro-fecha-registro"><i class="fa-solid fa-clock"></i> Fecha de registro:</label>
                             <input type="date" name="fecha-registro" id="libro-fecha-registro">
                         </div>
@@ -173,6 +180,35 @@ include '../../config/conexion.php';
                     </form>
                 </div>
             </div>
+        </section>
+
+        <section id="seguimiento-prestamos" class="system-section seguimiento-prestamos-section">
+            <div class="header-flex">
+                <h2 class="section-title">Seguimiento de préstamos</h2>
+                <div class="div-buttons">
+                    <button id="btn-descargar-pdf-prestamos" class="btn-pdf"><i class="fa-solid fa-file-pdf"></i>
+                        Descargar PDF</button>
+                    <button id="btn-descargar-excel-prestamos" class="btn-excel"><i class="fa-solid fa-file-excel"></i>
+                        Descargar Excel</button>
+                </div>
+            </div>
+
+            <!-- Tabla de préstamos -->
+            <table class="content-table" id="table-prestamos" style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Usuario</th>
+                        <th>Libro</th>
+                        <th>Fecha de préstamo</th>
+                        <th>Fecha de devolución estimada</th>
+                        <th>Fecha de devolución</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-prestamos">
+                </tbody>
+            </table>
         </section>
 
         <section id="usuarios" class="system-section usuarios-section">
@@ -193,23 +229,37 @@ include '../../config/conexion.php';
                         <th>ID</th>
                         <th>Nombre</th>
                         <th>Rol</th>
-                        <th>Último Inicio de Sesión</th>
-                        <th>Historial de Préstamos</th>
-                        <th>Aplicar Penalización</th>
+                        <th>Último inicio de sesión</th>
+                        <th>Historial de préstamos</th>
                     </tr>
                 </thead>
                 <tbody id="tbody-usuarios">
                 </tbody>
             </table>
 
-
             <!-- Modal para gestionar historial de préstamos -->
-            <div class="modal hide" id="modal-historial-prestamos">
+            <div class="modal hide" id="modal-historial-prestamos" style="width: 100%;">
                 <div class="modal-content">
                     <span id="close-modal-historial-btn" class="close-btn">&times;</span>
-                    <div class="title"><i class="fa-solid fa-book-open"></i> Historial de Préstamos</div>
+                    <div class="title" id="title-modal-historial"><i class="fa-solid fa-book-open"></i> Historial de préstamos</div>
                     <div id="historial-prestamos-contenido">
-                        <!-- Aquí se mostrará el historial de préstamos del usuario seleccionado -->
+                        <table class="content-table" id="table-historial">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Libro</th>
+                                    <th>Fecha de préstamo</th>
+                                    <th>Fecha de devolución estimada</th>
+                                    <th>Fecha de devolución</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-historial">
+                                <!-- Las filas se agregarán aquí dinámicamente -->
+                            </tbody>
+                        </table>
+
+                        <p id="message-no-historial">No hay historial de préstamos para este usuario.</p>
                     </div>
                 </div>
             </div>
@@ -235,180 +285,6 @@ include '../../config/conexion.php';
             </div>
         </section>
 
-        <section id="seguimiento-prestamos" class="system-section seguimiento-prestamos-section">
-            <div class="header-flex">
-                <h2 class="section-title">Seguimiento de préstamos</h2>
-                <div class="div-buttons">
-                    <button id="btn-descargar-pdf-prestamos" class="btn-pdf"><i class="fa-solid fa-file-pdf"></i>
-                        Descargar PDF</button>
-                    <button id="btn-descargar-excel-prestamos" class="btn-excel"><i class="fa-solid fa-file-excel"></i>
-                        Descargar Excel</button>
-                </div>
-            </div>
-
-            <!-- Tabla de préstamos -->
-            <table class="content-table" id="table-prestamos" style="width: 100%;">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Usuario</th>
-                        <th>Libro</th>
-                        <th>Fecha de Inicio</th>
-                        <th>Devolución Estimada</th>
-                        <th>Estado</th>
-                        <th>Actualizar Estado</th>
-                    </tr>
-                </thead>
-                <tbody id="tbody-prestamos">
-                    <tr>
-                        <td>1</td>
-                        <td>Juan Pérez</td>
-                        <td>El Gran Gatsby</td>
-                        <td>2024-10-01</td>
-                        <td>2024-10-15</td>
-                        <td>Activo</td>
-                        <td><button class="btn btn-actualizar"><i class="fas fa-sync-alt"></i> Actualizar</button></td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>Ana González</td>
-                        <td>Cien años de soledad</td>
-                        <td>2024-10-05</td>
-                        <td>2024-10-19</td>
-                        <td>Devuelto</td>
-                        <td><button class="btn btn-actualizar"><i class="fas fa-sync-alt"></i> Actualizar</button></td>
-                    </tr>
-                    <tr>
-                        <td>3</td>
-                        <td>Pedro Rodríguez</td>
-                        <td>1984</td>
-                        <td>2024-10-07</td>
-                        <td>2024-10-21</td>
-                        <td>Activo</td>
-                        <td><button class="btn btn-actualizar"><i class="fas fa-sync-alt"></i> Actualizar</button></td>
-                    </tr>
-                    <tr>
-                        <td>4</td>
-                        <td>Lucía Fernández</td>
-                        <td>Orgullo y prejuicio</td>
-                        <td>2024-10-10</td>
-                        <td>2024-10-24</td>
-                        <td>Activo</td>
-                        <td><button class="btn btn-actualizar"><i class="fas fa-sync-alt"></i> Actualizar</button></td>
-                    </tr>
-                    <tr>
-                        <td>5</td>
-                        <td>Carlos Méndez</td>
-                        <td>Don Quijote de la Mancha</td>
-                        <td>2024-10-12</td>
-                        <td>2024-10-26</td>
-                        <td>Devuelto</td>
-                        <td><button class="btn btn-actualizar"><i class="fas fa-sync-alt"></i> Actualizar</button></td>
-                    </tr>
-                    <tr>
-                        <td>6</td>
-                        <td>Maria López</td>
-                        <td>La sombra del viento</td>
-                        <td>2024-10-15</td>
-                        <td>2024-10-29</td>
-                        <td>Activo</td>
-                        <td><button class="btn btn-actualizar"><i class="fas fa-sync-alt"></i> Actualizar</button></td>
-                    </tr>
-                    <tr>
-                        <td>7</td>
-                        <td>José Martínez</td>
-                        <td>La casa de los espíritus</td>
-                        <td>2024-10-18</td>
-                        <td>2024-11-01</td>
-                        <td>Activo</td>
-                        <td><button class="btn btn-actualizar"><i class="fas fa-sync-alt"></i> Actualizar</button></td>
-                    </tr>
-                    <tr>
-                        <td>8</td>
-                        <td>Laura Sánchez</td>
-                        <td>El código Da Vinci</td>
-                        <td>2024-10-20</td>
-                        <td>2024-11-03</td>
-                        <td>Devuelto</td>
-                        <td><button class="btn btn-actualizar"><i class="fas fa-sync-alt"></i> Actualizar</button></td>
-                    </tr>
-                </tbody>
-            </table>
-
-
-            <!-- Modal para registrar préstamo -->
-            <div class="modal hide" id="modal-registrar-prestamo">
-                <div class="modal-content">
-                    <span id="close-modal-prestamo-btn" class="close-btn">&times;</span>
-                    <div class="title"><i class="fa-solid fa-book"></i> Registrar Préstamo</div>
-                    <form id="form-registrar-prestamo" autocomplete="off">
-                        <div class="row">
-                            <label for="prestamo-usuario"><i class="fa-solid fa-user"></i> Usuario:</label>
-                            <select name="usuario" id="prestamo-usuario" required>
-                                <!-- Opciones de usuarios disponibles -->
-                            </select>
-                        </div>
-                        <div class="row">
-                            <label for="prestamo-libro"><i class="fa-solid fa-book-open"></i> Libro:</label>
-                            <select name="libro" id="prestamo-libro" required>
-                                <!-- Opciones de libros disponibles -->
-                            </select>
-                        </div>
-                        <div class="row">
-                            <label for="prestamo-fecha-inicio"><i class="fa-solid fa-calendar"></i> Fecha de
-                                Inicio:</label>
-                            <input type="date" name="fecha_inicio" id="prestamo-fecha-inicio" required>
-                        </div>
-                        <div class="row">
-                            <label for="prestamo-fecha-devolucion"><i class="fa-solid fa-calendar"></i> Devolución
-                                Estimada:</label>
-                            <input type="date" name="fecha_devolucion" id="prestamo-fecha-devolucion" required>
-                        </div>
-                        <div class="row">
-                            <label for="prestamo-estado"><i class="fa-solid fa-exclamation-circle"></i> Estado:</label>
-                            <select name="estado" id="prestamo-estado" required>
-                                <option value="prestado">En préstamo</option>
-                                <option value="devuelto">Devuelto</option>
-                                <option value="retrasado">Retrasado</option>
-                            </select>
-                        </div>
-                        <div class="row button">
-                            <button type="submit" id="btn-registrar-prestamo"><i class="fa-solid fa-plus"></i> Registrar
-                                Préstamo</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Modal para actualizar estado de préstamo -->
-            <div class="modal hide" id="modal-actualizar-estado-prestamo">
-                <div class="modal-content">
-                    <span id="close-modal-actualizar-btn" class="close-btn">&times;</span>
-                    <div class="title"><i class="fa-solid fa-sync-alt"></i> Actualizar Estado del Préstamo</div>
-                    <form id="form-actualizar-estado-prestamo" autocomplete="off">
-                        <input type="hidden" name="prestamo_id" id="prestamo-id">
-                        <div class="row">
-                            <label for="nuevo-estado-prestamo"><i class="fa-solid fa-exclamation-triangle"></i> Nuevo
-                                Estado:</label>
-                            <select name="nuevo_estado" id="nuevo-estado-prestamo" required>
-                                <option value="devuelto">Devuelto</option>
-                                <option value="retrasado">Retrasado</option>
-                            </select>
-                        </div>
-                        <div class="row">
-                            <label for="comentarios-estado"><i class="fa-solid fa-comment-dots"></i>
-                                Comentarios:</label>
-                            <textarea name="comentarios" id="comentarios-estado" rows="4"></textarea>
-                        </div>
-                        <div class="row button">
-                            <button type="submit" id="btn-actualizar-estado"><i class="fa-solid fa-check-circle"></i>
-                                Actualizar Estado</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </section>
-
         <section id="configuracion" class="system-section configuracion-section">
             <div class="header-flex">
                 <h2 class="section-title">Configuración</h2>
@@ -423,6 +299,10 @@ include '../../config/conexion.php';
                     <div class="user-info">
                         <i class="fa-solid fa-calendar"></i>
                         <p>Fecha registro: <strong><?php echo date('d-m-Y', strtotime($fechaRegistro)); ?></strong></p>
+                    </div>
+                    <div class="user-info">
+                        <i class="fa-solid fa-id-badge"></i>
+                        <p>Rol: <strong><?php echo $rolUsuario; ?></strong></p>
                     </div>
                 </div>
 
@@ -490,6 +370,16 @@ include '../../config/conexion.php';
             <p>Pageflow | 2024</p>
         </div>
     </footer>
+
+    <script>
+        // Pasar el usuario al script.js
+        const usuarioActual = {
+            id: "<?php echo $idUsuario; ?>",
+            nombre: "<?php echo $nombreUsuario; ?>",
+            rol: "<?php echo $rolUsuario; ?>",
+            fechaRegistro: "<?php echo $fechaRegistro; ?>"
+        };
+    </script>
 </body>
 
 </html>
