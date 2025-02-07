@@ -16,6 +16,7 @@ $fechaRegistro = isset($_SESSION["fecha_registro"]) ? $_SESSION["fecha_registro"
 
 // Conectar a la base de datos
 include '../../config/conexion.php';
+include '../../config/backup.php';
 ?>
 
 <!DOCTYPE html>
