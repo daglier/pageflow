@@ -10,3 +10,15 @@ Correciones Interfaz de usuario:
 
 5-Compatibilidad (1.5) *No se adapta a la vista de teléfono.
 
+Correciones Código PHP:
+
+1-Conocimiento del Lenguaje PHP (3)
+
+2-Implementación del CRUD (2.25) *Hay un problema con la tabla de libros al actualizar
+
+3-Funcionalidad del CRUD (3)
+
+4-Entrega del Trabajo (3)
+
+5-Documentación (3)
+
