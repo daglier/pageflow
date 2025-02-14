@@ -134,4 +134,10 @@ class UsuarioDAO
         $stmt->bind_param("si", $fecha, $id_usuario);
         return $stmt->execute();
     }
+
+    // Función para obtener el ID del último registro insertado en la base de datos
+    public function getLastInsertId()
+    {
+        return $this->conexion->insert_id;
+    }
 }

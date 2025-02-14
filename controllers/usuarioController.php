@@ -74,9 +74,13 @@ class UsuarioController
         $nuevoUsuario = new Usuario($nombre_usuario, $hashed_password, $rol, $fecha_registro, $pregunta_seguridad_1, $pregunta_seguridad_2, $pregunta_seguridad_3, $fecha_registro);
 
         if ($this->usuarioDAO->crearUsuario($nuevoUsuario)) {
-            $_SESSION['id_usuario'] = $nuevoUsuario->getId_usuario();
+            
+            $id_usuario = $this->usuarioDAO->getLastInsertId();
+
+            $_SESSION['id_usuario'] = $id_usuario;
             $_SESSION['nombre_usuario'] = $nombre_usuario;
             $_SESSION["rol"] = $rol;
+            $_SESSION["fecha_registro"] = $fecha_registro;
 
             // Actualizar último inicio de sesión
 

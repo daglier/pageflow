@@ -78,7 +78,7 @@ class PrestamoDAO
     public function actualizarPrestamo($id_prestamo, $estado)
     {
         $stmt = $this->conexion->prepare("UPDATE " . TABLE_PRESTAMOS . " SET estado = ? WHERE id_prestamo = ?");
-        $stmt->bind_param("ii", $estado, $id_prestamo);
+        $stmt->bind_param("si", $estado, $id_prestamo);
         return $stmt->execute();
     }
 

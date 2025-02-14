@@ -43,16 +43,23 @@
 
     // Función para actualizar el botón entre "Pedir" y "Devolver"
     const actualizarBotonPrestamoDevolucion = (libroId, estaPrestado) => {
-        const btn = document.querySelector(`button[data-id="${libroId}"]`);
-        if (estaPrestado) {
-            btn.classList.replace("btn-prestamo", "btn-devolver");
-            btn.classList.replace("btn-prestamo-libro", "btn-devolver-libro");
-            btn.innerHTML = `<i class="fa-solid fa-undo"></i>`;
-        } else {
-            btn.classList.replace("btn-devolver", "btn-prestamo");
-            btn.classList.replace("btn-devolver-libro", "btn-prestamo-libro");
-            btn.innerHTML = `<i class="fa-solid fa-book"></i>`;
-        }
+        // Selecciona todas las instancias del botón con el data-id dado
+        const botones = document.querySelectorAll(`button[data-id="${libroId}"]`);
+
+        // Itera sobre cada botón encontrado y actualízalo
+        botones.forEach(btn => {
+            if (estaPrestado) {
+                btn.classList.replace("btn-prestamo", "btn-devolver");
+                btn.classList.replace("btn-prestamo-libro", "btn-devolver-libro");
+                btn.innerHTML = `<i class="fa-solid fa-undo"></i>`;
+            } else {
+                btn.classList.replace("btn-devolver", "btn-prestamo");
+                btn.classList.replace("btn-devolver-libro", "btn-prestamo-libro");
+                btn.innerHTML = `<i class="fa-solid fa-book"></i>`;
+            }
+        });
+
+        $('#table-libros').DataTable().responsive.recalc();
     };
 
     // Función para pedir un libro (préstamo)
@@ -64,7 +71,6 @@
 
         const formData = new FormData();
         formData.append("id_libro", libroId);
-        formData.append("id_usuario", usuarioActual.id); // Suponiendo que 'usuarioActual' es un objeto con los datos del usuario
         formData.append("fecha_devolucion_estimada", formatearFechaAFormatoDB(fechaDevolucionEstimada));
 
         fetch('../../controllers/prestamoController.php?action=crearPrestamo', {
@@ -94,7 +100,6 @@
 
         const formData = new FormData();
         formData.append("id_libro", libroId);
-        formData.append("id_usuario", usuarioActual.id);
 
         fetch('../../controllers/prestamoController.php?action=devolverLibro', {
             method: "POST",
@@ -115,8 +120,8 @@
     };
 
     // Función para verificar si el usuario ya tiene el libro
-    const verificarPrestamoExistente = (id_usuario, id_libro) => {
-        return fetch(`../../controllers/prestamoController.php?action=verificarPrestamoExistente&id_usuario=${id_usuario}&id_libro=${id_libro}`)
+    const verificarPrestamoExistente = (id_libro) => {
+        return fetch(`../../controllers/prestamoController.php?action=verificarPrestamoExistente&id_libro=${id_libro}`)
             .then(response => response.json())
             .then(data => data.existe);
     };
@@ -208,25 +213,27 @@
     document.addEventListener("click", event => {
         if (event.target.closest(".btn-modificar-libro")) {
             const btnModificar = event.target.closest(".btn-modificar-libro");
-            const row = btnModificar.closest("tr");
+            const row = $(btnModificar).closest("tr");
+            const rowData = $('#table-libros').DataTable().row(row).data();
 
-            // Cargar datos en el formulario
-            libroId.value = row.cells[0].textContent;
-            libroTitulo.value = row.cells[1].textContent;
-            libroAutor.value = row.cells[2].textContent;
-            libroGenero.value = row.cells[3].textContent;
-            libroAnoPublicacion.value = row.cells[4].textContent;
-            libroEstado.value = row.cells[5].textContent;
-            libroSinopsis.value = row.cells[6].textContent;
+            // Cargar datos en el formulario desde DataTables
+            libroId.value = rowData[0];
+            libroTitulo.value = rowData[1];
+            libroAutor.value = rowData[2];
+            libroGenero.value = rowData[3];
+            libroAnoPublicacion.value = rowData[4];
+            libroEstado.value = rowData[5];
+            libroSinopsis.value = rowData[6];
 
             // Convertir la fecha del formato 'd/m/yyyy' a 'yyyy-mm-dd'
-            const fecha = row.cells[7].textContent;
+            const fecha = rowData[7];
             const [dia, mes, ano] = fecha.split('/');
             libroFechaRegistro.value = `${ano}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`;
 
             // Actualizar título y botón del modal
             modalLibrosContentTitle.innerHTML = '<i class="fa-solid fa-edit"></i> Modificar libro';
             modalLibrosBtn.innerHTML = '<i class="fa-solid fa-save"></i> Guardar';
+
             showModal(modalLibros);
         }
     });
@@ -235,12 +242,14 @@
     document.addEventListener("click", event => {
         if (event.target.closest(".btn-eliminar-libro")) {
             const btnEliminar = event.target.closest(".btn-eliminar-libro");
-            const row = btnEliminar.closest("tr");
-            const idAno = row.cells[0].textContent;
+            const row = $(btnEliminar).closest("tr");
+            const rowData = $('#table-libros').DataTable().row(row).data();
+
+            const idLibro = rowData[0];
 
             if (confirm("¿Está seguro de que desea eliminar este libro?")) {
                 const formData = new FormData();
-                formData.append("id_libro", idAno);
+                formData.append("id_libro", idLibro);
 
                 fetch('../../controllers/libroController.php?action=eliminarLibro', {
                     method: "POST",
@@ -249,8 +258,8 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            // Eliminar fila de la tabla
-                            datatableLibros.row(row).remove().draw();
+                            // Eliminar la fila usando la API de DataTables y redibujar la tabla
+                            $('#table-libros').DataTable().row(row).remove().draw();
                             alert(data.message);
                         } else {
                             alert(data.message);
@@ -270,7 +279,7 @@
             if (data.success) {
                 if (data.libros.length > 0) {
                     data.libros.forEach(libro => {
-                        verificarPrestamoExistente(usuarioActual.id, libro.id).then(existe => {
+                        verificarPrestamoExistente(libro.id).then(existe => {
                             const row = document.createElement('tr');
                             row.innerHTML = `
                         <td>${libro.id}</td>

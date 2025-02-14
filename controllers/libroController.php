@@ -31,6 +31,13 @@ class LibroController
         $portada = null;
         $fecha_registro = date('Y-m-d');
 
+        // Verificar si ya existe el libro (título)
+        if ($this->libroDAO->existeTitulo($titulo)) {
+            echo json_encode(['success' => false, 'message' => 'Ya existe un libro con este título.']);
+            return;
+        }
+
+        // Crear el libro si no existe
         $nuevoLibro = new Libro($titulo, $autor, $genero, $ano_publicacion, $estado, $sinopsis, $portada, $fecha_registro);
 
         if ($this->libroDAO->crearLibro($nuevoLibro)) {

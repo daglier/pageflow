@@ -21,8 +21,9 @@ class PrestamoController
     // Función para crear un nuevo préstamo
     public function crearPrestamo()
     {
-        // Recibir datos del formulario
-        $id_usuario = $_POST['id_usuario'];
+        session_start();
+
+        $id_usuario = $_SESSION['id_usuario'];
         $id_libro = $_POST['id_libro'];
         $fecha_prestamo = date('Y-m-d');
         $fecha_devolucion_estimada = $_POST['fecha_devolucion_estimada'];
@@ -50,6 +51,18 @@ class PrestamoController
     public function obtenerPrestamos()
     {
         $prestamos = $this->prestamoDAO->getAllPrestamos();
+
+        // Verificar si algún préstamo está vencido y actualizar su estado a "retrasado"
+        foreach ($prestamos as $prestamo) {
+            if (
+                $prestamo->getEstado() === 'en_prestamo' &&
+                strtotime($prestamo->getFecha_devolucion_estimada()) < time()
+            ) {
+                $this->prestamoDAO->actualizarPrestamo($prestamo->getId_prestamo(), 'retrasado');
+                $prestamo->setEstado('retrasado');
+            }
+        }
+
         $prestamosArray = [];
 
         foreach ($prestamos as $prestamo) {
@@ -99,7 +112,9 @@ class PrestamoController
     // Función para devolver un libro
     public function devolverLibro()
     {
-        $id_usuario = $_POST['id_usuario'];
+        session_start();
+
+        $id_usuario = $_SESSION['id_usuario'];
         $id_libro = $_POST['id_libro'];
         $fecha_devolucion = date('Y-m-d');
 
@@ -134,7 +149,9 @@ class PrestamoController
     // Función para verificar si el usuario ya tiene el libro
     public function verificarPrestamoExistente()
     {
-        $id_usuario = $_GET['id_usuario'];
+        session_start();
+
+        $id_usuario = $_SESSION['id_usuario'];
         $id_libro = $_GET['id_libro'];
 
         // Verificar si el usuario tiene un préstamo activo del libro

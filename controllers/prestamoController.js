@@ -36,62 +36,51 @@
                 datatablePrestamos.clear().draw();
 
                 if (data.prestamos.length > 0) {
-                    const promesas = data.prestamos.map(prestamo => {
-                        return Promise.all([
-                            obtenerNombreUsuarioPorId(prestamo.id_usuario),
-                            obtenerTituloLibroPorId(prestamo.id_libro)
-                        ])
-                            .then(([nombreUsuario, tituloLibro]) => {
-                                return {
-                                    ...prestamo,
-                                    nombreUsuario,
-                                    tituloLibro
-                                };
-                            })
-                            .catch(error => {
-                                console.error('Error en las promesas de nombres:', error);
-                                return prestamo;
-                            });
-                    });
+                    const promesas = data.prestamos.map(prestamo => Promise.all([
+                        obtenerNombreUsuarioPorId(prestamo.id_usuario),
+                        obtenerTituloLibroPorId(prestamo.id_libro)
+                    ]).then(([nombreUsuario, tituloLibro]) => ({
+                        ...prestamo, nombreUsuario, tituloLibro
+                    })));
 
-                    Promise.all(promesas)
-                        .then(prestamosCompletos => {
-                            prestamosCompletos.forEach(prestamo => {
-                                const fechaPrestamo = new Date(prestamo.fecha_prestamo + 'T00:00:00');
-                                const fechaDevolucionEstimada = new Date(prestamo.fecha_devolucion_estimada + 'T00:00:00');
-                                const fechaDevolucion = prestamo.fecha_devolucion
-                                    ? new Date(prestamo.fecha_devolucion + 'T00:00:00')
-                                    : null;
+                    Promise.all(promesas).then(prestamosCompletos => {
+                        prestamosCompletos.forEach(prestamo => {
+                            const fechaDevolucionEstimada = new Date(prestamo.fecha_devolucion_estimada);
+                            const fechaDevolucion = prestamo.fecha_devolucion ? new Date(prestamo.fecha_devolucion) : null;
+                            const hoy = new Date();
+                            let estadoFinal = transformarEstadoPrestamo(prestamo.estado);
 
-                                const estadoTransformado = transformarEstadoPrestamo(prestamo.estado);
+                            // Si el préstamo está "en_prestamo", se calcula el número de días transcurridos
+                            if (prestamo.estado === 'en_prestamo') {
+                                const diasPrestamo = Math.floor((hoy - new Date(prestamo.fecha_prestamo)) / (1000 * 60 * 60 * 24));
+                                estadoFinal += ` (${diasPrestamo} días)`;
+                            }
+                            // Mantenimiento de la lógica para "retrasado"
+                            else if (prestamo.estado === 'retrasado' && !fechaDevolucion) {
+                                const diasRetraso = Math.floor((hoy - fechaDevolucionEstimada) / (1000 * 60 * 60 * 24));
+                                estadoFinal += ` (${diasRetraso} días)`;
+                            }
 
-                                const row = document.createElement('tr');
-                                row.innerHTML = `
-                                <td>${prestamo.id}</td>
-                                <td>${prestamo.nombreUsuario}</td>
-                                <td>${prestamo.tituloLibro}</td>
-                                <td>${fechaPrestamo.toLocaleDateString('es-ES')}</td>
-                                <td>${fechaDevolucionEstimada.toLocaleDateString('es-ES')}</td>
-                                <td>${fechaDevolucion ? fechaDevolucion.toLocaleDateString('es-ES') : 'No registrada'}</td>
-                                <td>${estadoTransformado}</td>
-                            `;
-                                tbodyPrestamos.appendChild(row);
-                                datatablePrestamos.row.add(row).draw();
-                            });
-                        })
-                        .catch(error => {
-                            console.error('Error al procesar las promesas de préstamos:', error);
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                            <td>${prestamo.id}</td>
+                            <td>${prestamo.nombreUsuario}</td>
+                            <td>${prestamo.tituloLibro}</td>
+                            <td>${new Date(prestamo.fecha_prestamo).toLocaleDateString('es-ES')}</td>
+                            <td>${fechaDevolucionEstimada.toLocaleDateString('es-ES')}</td>
+                            <td>${fechaDevolucion ? fechaDevolucion.toLocaleDateString('es-ES') : 'No registrada'}</td>
+                            <td>${estadoFinal}</td>
+                        `;
+                            tbodyPrestamos.appendChild(row);
+                            datatablePrestamos.row.add(row).draw();
                         });
+                    });
                 } else {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `<td colspan="7">No hay préstamos registrados.</td>`;
-                    tbodyPrestamos.appendChild(row);
+                    tbodyPrestamos.innerHTML = '<tr><td colspan="7">No hay préstamos registrados.</td></tr>';
                 }
             } else {
                 console.error('Error al cargar los préstamos:', data.message);
             }
         })
-        .catch(error => {
-            console.error('Error al realizar la solicitud para cargar los préstamos:', error);
-        });
+        .catch(error => console.error('Error al realizar la solicitud para cargar los préstamos:', error));
 })();

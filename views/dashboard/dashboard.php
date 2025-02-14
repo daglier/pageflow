@@ -32,11 +32,112 @@ include '../../config/backup.php';
     <title>Pageflow | Panel principal</title>
     <link rel="icon" href="../../public/images/icons/logo.jpg" type="image/jpg">
     <link rel="stylesheet" href="../../public/fontawesome/css/all.css">
+
+    <style>
+        /* poppins-900italic - latin */
+        @font-face {
+            font-family: 'Poppins';
+            font-style: italic;
+            font-weight: 900;
+            font-display: swap;
+            src: url('../../public/fonts/poppins-v22-latin-900italic.woff2') format('woff2');
+        }
+
+        /* poppins-900 - latin */
+        @font-face {
+            font-family: 'Poppins';
+            font-style: black;
+            font-display: swap;
+            src: url('../../public/fonts/poppins-v22-latin-900.woff2') format('woff2');
+        }
+
+        /* poppins-700italic - latin */
+        @font-face {
+            font-family: 'Poppins';
+            font-style: italic;
+            font-weight: 700;
+            font-display: swap;
+            src: url('../../public/fonts/poppins-v22-latin-700italic.woff2') format('woff2');
+        }
+
+        /* poppins-700 - latin */
+        @font-face {
+            font-family: 'Poppins';
+            font-style: bold;
+            font-weight: 700;
+            font-display: swap;
+            src: url('../../public/fonts/poppins-v22-latin-700.woff2') format('woff2');
+        }
+
+        /* poppins-600italic - latin */
+        @font-face {
+            font-family: 'Poppins';
+            font-style: italic;
+            font-weight: 600;
+            font-display: swap;
+            src: url('../../public/fonts/poppins-v22-latin-600italic.woff2') format('woff2');
+        }
+
+        /* poppins-600 - latin */
+        @font-face {
+            font-family: 'Poppins';
+            font-style: semibold;
+            font-weight: 600;
+            font-display: swap;
+            src: url('../../public/fonts/poppins-v22-latin-600.woff2') format('woff2');
+        }
+
+        /* poppins-500italic - latin */
+        @font-face {
+            font-family: 'Poppins';
+            font-style: italic;
+            font-weight: 500;
+            font-display: swap;
+            src: url('../../public/fonts/poppins-v22-latin-500italic.woff2') format('woff2');
+        }
+
+        /* poppins-500 - latin */
+        @font-face {
+            font-family: 'Poppins';
+            font-style: medium;
+            font-weight: 500;
+            font-display: swap;
+            src: url('../../public/fonts/poppins-v22-latin-500.woff2') format('woff2');
+        }
+
+        /* poppins-italic - latin */
+        @font-face {
+            font-family: 'Poppins';
+            font-style: italic;
+            font-weight: 400;
+            font-display: swap;
+            src: url('../../public/fonts/poppins-v22-latin-italic.woff2') format('woff2');
+        }
+
+        /* poppins-regular - latin */
+        @font-face {
+            font-family: 'Poppins';
+            font-style: normal;
+            font-weight: 400;
+            font-display: swap;
+            src: url('../../public/fonts/poppins-v22-latin-regular.woff2') format('woff2');
+        }
+
+        :root {
+            --font-primary: 'Poppins', serif;
+        }
+
+        body {
+            font-family: var(--font-primary);
+        }
+    </style>
+
     <link rel="stylesheet" href="styles.css">
     <script type="text/javascript" src="../../public/datatables/jquery-3.7.1.min.js"></script>
     <script type="text/javascript" src="../../public/datatables/datatables.js"></script>
     <script type="text/javascript" src="../../public/datatables/datatables.min.js"></script>
     <script src="script.js" type="text/javascript" defer></script>
+    <script src="darkMode.js" type="text/javascript" defer></script>
     <script src="../../controllers/usuarioController.js" defer></script>
     <script src="../../controllers/libroController.js" defer></script>
     <script src="../../controllers/prestamoController.js" defer></script>
@@ -70,6 +171,15 @@ include '../../config/backup.php';
                 <a class="menu-item configuracion" href="#">
                     <i class="fas fa-gear"></i> <span class="menu-text">Configuración</span>
                 </a>
+                <li>
+                    <label for="slider" class="switch">
+                        <input type="checkbox" id="slider">
+                        <span class="slider">
+                            <i class="fa-solid fa-moon icon moon-icon"></i>
+                            <i class="fa-solid fa-sun icon sun-icon"></i>
+                        </span>
+                    </label>
+                </li>
             </nav>
 
             <button class="btn" id="logout-button">
