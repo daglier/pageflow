@@ -1,5 +1,7 @@
-Correciones Interfaz de usuario:
+# Nota
+No se pudieron realizar correciones ya que la app no esta funcionando, por favor corregir error. 
 
+# Correciones Interfaz de usuario
 1-Diseño Visual (2.25) *La paleta de colores es adecuada, pero podria ser mejorada.
 
 2-Navegación (2.25) *Problemas al actualizar la página.
@@ -10,7 +12,7 @@ Correciones Interfaz de usuario:
 
 5-Compatibilidad (1.5) *No se adapta a la vista de teléfono.
 
-Correciones Código PHP:
+# Correciones Código PHP
 
 1-Conocimiento del Lenguaje PHP (3)
 
