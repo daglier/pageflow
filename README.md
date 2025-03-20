@@ -1,7 +1,7 @@
 ## Enlace del Proyecto
 https://pageflow.infinityfreeapp.com/
 
-#Nota
+# Nota
 Curso de diseño gráfico: https://youtu.be/Prpr7GKgMFQ?si=OCyKiYxgPavoC0lw. En este curso podrán entender un poco más los conceptos de diseño gráfico. 
 
 
