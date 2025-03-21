@@ -8,22 +8,27 @@ Curso de diseño gráfico: https://youtu.be/Prpr7GKgMFQ?si=OCyKiYxgPavoC0lw. En 
 # Correciones Interfaz de usuario
 1-Diseño Visual (2.25) *La paleta de colores es adecuada, pero podría ser mejorada.
 
-2-Navegación (2.25) 
-*Problemas al actualizar la página. La pestaña de libros y prestamos al actualizar desaparecen los registros. 
+2-Navegación (3) 
+
 
 3-Funcionalidad (2.25) *Se deben solucionar los requerimientos faltantes.
 
-4-Usabilidad (2.25) *El apartado de prestamos necesita más retroalimentación.
+4-Usabilidad (3)
 
-5-Compatibilidad (1.5) *Las tablas no se adapta a la vista de teléfono. 
+5-Compatibilidad (1.5) 
+*Los libros prestados no se ven el la vista móvil 
+-Vista https://prnt.sc/zTyfkUhe5Iem
+-Vista del navegador https://prnt.sc/jlBJfYSN990G
 
 # Correcciones Código PHP
 
 1-Conocimiento del Lenguaje PHP (3)
 
-2-Implementación del CRUD (2.25) *Hay un problema con la tabla de libros al actualizar 
+2-Implementación del CRUD (3)
 
-3-Funcionalidad del CRUD (3)
+3-Funcionalidad del CRUD (2.25)
+-Error con la actualización de los datos de usuario
+-Falta la opción de eliminar 
 
 4-Entrega del Trabajo (3)
 
